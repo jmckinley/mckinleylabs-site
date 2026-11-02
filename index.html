@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>McKinley Labs — Security for the agent era</title>
+<meta name="description" content="McKinley Labs builds security infrastructure for enterprise AI: ThreatVec for agent posture, Bastion for inference governance, and Snapper for runtime enforcement down to the kernel.">
+<link rel="canonical" href="https://mckinleylabsllc.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="McKinley Labs — Security for the agent era">
+<meta property="og:description" content="See every agent. Govern every prompt. Contain every runtime. Three products from McKinley Labs.">
+<meta property="og:url" content="https://mckinleylabsllc.com/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2311151c'/%3E%3Cpath d='M8 23V9l8 8 8-8v14' fill='none' stroke='%23e9e4d8' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "McKinley Labs, LLC",
+  "url": "https://mckinleylabsllc.com/",
+  "founder": {
+    "@type": "Person",
+    "name": "John McKinley",
+    "sameAs": ["https://www.linkedin.com/in/johnamckinley/", "https://github.com/jmckinley", "https://medium.com/@johnamckinley"]
+  },
+  "address": {"@type": "PostalAddress", "addressLocality": "Great Falls", "addressRegion": "VA", "addressCountry": "US"},
+  "owns": [
+    {"@type": "SoftwareApplication", "name": "ThreatVec", "url": "https://threatvec.com/", "applicationCategory": "SecurityApplication"},
+    {"@type": "SoftwareApplication", "name": "Bastion", "url": "https://bastionplane.ai/", "applicationCategory": "SecurityApplication"},
+    {"@type": "SoftwareApplication", "name": "Snapper", "url": "https://snapperprotect.com/", "applicationCategory": "SecurityApplication"}
+  ]
+}
+</script>
+<style>
+:root {
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --ink: #11151c;
+  --ink-2: #3d4350;
+  --muted: #6b7180;
+  --line: #e2ddd1;
+  --accent: #1f5f5b;
+  --tv: #5b5bd6;
+  --bs: #2b6fd6;
+  --sn: #17a673;
+  --band: #11151c;
+  --band-ink: #e9e4d8;
+  --band-muted: #9aa0ab;
+  --band-line: #262c36;
+  --serif: "Fraunces", Georgia, serif;
+  --sans: "Inter", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --max: 1120px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1016; --surface: #141821; --ink: #ece8de; --ink-2: #c4c7cf; --muted: #8b919d;
+    --line: #242a35; --accent: #5fb3ab; --tv: #8b8bf0; --bs: #6aa2f0; --sn: #3fd19a;
+    --band: #07090d; --band-line: #1c212b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1016; --surface: #141821; --ink: #ece8de; --ink-2: #c4c7cf; --muted: #8b919d;
+  --line: #242a35; --accent: #5fb3ab; --tv: #8b8bf0; --bs: #6aa2f0; --sn: #3fd19a;
+  --band: #07090d; --band-line: #1c212b;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.015em; margin: 0; }
+h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.12; }
+p { margin: 0; }
+
+/* nav */
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; letter-spacing: -.01em; }
+.brand svg { width: 26px; height: 26px; }
+.nav ul { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; font-size: 15px; }
+.nav ul a { text-decoration: none; color: var(--ink-2); }
+.nav ul a:hover { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 999px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 500; font-size: 15px; border: 1px solid var(--ink); transition: transform .15s; }
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.nav .btn { padding: 8px 14px; font-size: 14px; }
+
+/* hero */
+.hero { padding-top: 104px; padding-bottom: 88px; }
+.hero h1 { font-size: clamp(44px, 7.2vw, 86px); line-height: 1.02; max-width: 15ch; margin-top: 22px; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero .lede { font-size: clamp(18px, 2vw, 21px); color: var(--ink-2); max-width: 60ch; margin-top: 28px; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.triad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-top: 72px; }
+.triad div { background: var(--surface); padding: 22px 24px; }
+.triad b { display: block; font: 500 22px/1.2 var(--serif); }
+.triad span { color: var(--muted); font-size: 15px; }
+.triad i { font-style: normal; font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+
+/* sections */
+section { padding: 96px 0; border-top: 1px solid var(--line); }
+.head { display: grid; grid-template-columns: 1fr 1.25fr; gap: 48px; align-items: end; margin-bottom: 56px; }
+.head p { color: var(--ink-2); font-size: 18px; }
+.head .eyebrow { margin-bottom: 16px; }
+
+/* problem */
+.problems { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.problem { border-top: 2px solid var(--ink); padding-top: 18px; }
+.problem h3 { font-size: 21px; margin-bottom: 8px; }
+.problem p { color: var(--ink-2); font-size: 15.5px; }
+
+/* stack diagram */
+.stack { display: grid; gap: 10px; margin-bottom: 56px; }
+.layer { display: grid; grid-template-columns: 180px 1fr 150px; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c); }
+.layer .lname { font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.layer .ldesc { color: var(--ink-2); font-size: 15.5px; }
+.layer .lprod { font-weight: 600; color: var(--c); text-align: right; }
+
+/* products */
+.products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.product { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 30px 28px; display: flex; flex-direction: column; }
+.product .tag { display: inline-block; font: 500 11.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); border-radius: 999px; padding: 5px 10px; align-self: flex-start; }
+.product h3 { font-size: 32px; margin: 20px 0 6px; }
+.product .one { font-weight: 500; margin-bottom: 14px; }
+.product .desc { color: var(--ink-2); font-size: 15.5px; }
+.product ul { list-style: none; padding: 0; margin: 20px 0 24px; font-size: 15px; color: var(--ink-2); }
+.product li { padding: 8px 0 8px 22px; border-top: 1px solid var(--line); position: relative; }
+.product li::before { content: ""; position: absolute; left: 2px; top: 16px; width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+.product .stat { display: flex; gap: 22px; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); }
+.product .stat b { display: block; font: 500 24px/1.1 var(--serif); }
+.product .stat span { font-size: 12.5px; color: var(--muted); }
+.product a.go { margin-top: 22px; font-weight: 500; text-decoration: none; color: var(--c); }
+.product a.go:hover { text-decoration: underline; }
+.note { margin-top: 18px; font-size: 13.5px; color: var(--muted); }
+
+/* principles */
+.principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.principle .n { font: 500 13px var(--mono); color: var(--accent); }
+.principle h3 { font-size: 24px; margin: 10px 0 10px; }
+.principle p { color: var(--ink-2); font-size: 16px; }
+
+/* founder band */
+.band { background: var(--band); color: var(--band-ink); border-top: 0; }
+.band .eyebrow { color: var(--band-muted); }
+.founder { display: grid; grid-template-columns: 1fr 1.3fr; gap: 64px; }
+.founder h2 { color: var(--band-ink); }
+.founder .role { color: var(--band-muted); margin-top: 14px; }
+.founder .bio p { color: #c9c5bb; margin-bottom: 18px; }
+.founder .bio p:first-child { font: 400 22px/1.45 var(--serif); color: var(--band-ink); }
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--band-line); border: 1px solid var(--band-line); border-radius: 12px; overflow: hidden; margin-top: 36px; }
+.facts div { background: var(--band); padding: 18px 20px; }
+.facts b { display: block; font: 500 30px/1.1 var(--serif); color: var(--band-ink); }
+.facts span { font-size: 13.5px; color: var(--band-muted); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.links a { color: var(--band-ink); border: 1px solid var(--band-line); border-radius: 999px; padding: 8px 14px; text-decoration: none; font-size: 14px; }
+.links a:hover { border-color: var(--band-muted); }
+.career { margin-top: 56px; border-top: 1px solid var(--band-line); padding-top: 28px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+.career b { display: block; font-weight: 500; color: var(--band-ink); font-size: 15px; }
+.career span { color: var(--band-muted); font-size: 13.5px; }
+
+/* exits */
+.exits { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0 32px; }
+.exit { display: grid; grid-template-columns: 54px 1fr; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 15.5px; }
+.exit .q { font: 500 12.5px var(--mono); color: var(--muted); padding-top: 3px; }
+.exit .arrow { color: var(--muted); }
+
+/* writing */
+.posts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.post { display: flex; flex-direction: column; gap: 12px; padding: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-decoration: none; transition: border-color .15s, transform .15s; }
+.post:hover { border-color: var(--ink-2); transform: translateY(-2px); }
+.post h3 { font-size: 21px; line-height: 1.25; }
+.post p { color: var(--ink-2); font-size: 15px; }
+.post .meta { margin-top: auto; font: 500 12px var(--mono); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+/* contact */
+.contact { text-align: center; padding: 120px 0; }
+.contact h2 { font-size: clamp(34px, 5vw, 58px); max-width: 18ch; margin: 18px auto 0; }
+.contact p { color: var(--ink-2); max-width: 54ch; margin: 22px auto 34px; font-size: 18px; }
+.contact .ctas { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+
+footer { border-top: 1px solid var(--line); padding: 32px 0 44px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+footer a { color: var(--muted); text-decoration: none; margin-left: 18px; }
+footer a:hover { color: var(--ink); }
+
+@media (max-width: 960px) {
+  .nav ul { display: none; }
+  .head, .founder { grid-template-columns: 1fr; gap: 24px; }
+  .problems { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .products, .posts, .principles { grid-template-columns: 1fr; }
+  .career { grid-template-columns: repeat(2, 1fr); }
+  .layer { grid-template-columns: 1fr auto; }
+  .layer .ldesc { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 600px) {
+  .wrap { padding: 0 16px; }
+  .hero { padding-top: 64px; padding-bottom: 56px; }
+  section { padding: 68px 0; }
+  .triad, .problems { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr 1fr; }
+  footer a { margin: 0 18px 0 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="McKinley Labs home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M8 23V9l8 8 8-8v14" fill="none" stroke="var(--bg)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      McKinley Labs
+    </a>
+    <ul>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#founder">Founder</a></li>
+      <li><a href="#writing">Writing</a></li>
+    </ul>
+    <a class="btn" href="#contact">Get in touch</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="eyebrow">McKinley Labs · AI security infrastructure</div>
+    <h1>Security for the <em>agent era.</em></h1>
+    <p class="lede">Enterprises are handing AI agents the keys to their data, code, and systems. McKinley Labs builds the infrastructure to do that safely: visibility into every agent, governance over every prompt, and enforcement all the way down to the kernel.</p>
+    <div class="ctas">
+      <a class="btn" href="#products">Explore the products →</a>
+      <a class="btn ghost" href="#founder">About the founder</a>
+    </div>
+    <div class="triad">
+      <div><i style="color:var(--tv)">See</i><b>ThreatVec</b><span>Posture for every agent in the enterprise</span></div>
+      <div><i style="color:var(--bs)">Govern</i><b>Bastion</b><span>Control what every model is allowed to see</span></div>
+      <div><i style="color:var(--sn)">Contain</i><b>Snapper</b><span>Runtime enforcement from intent to kernel</span></div>
+    </div>
+  </div>
+
+  <section id="problem">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">The problem</div><h2>The AI attack surface is growing faster than security teams can track.</h2></div>
+        <p>Every agent a developer ships can reach databases, email, repositories, and internal APIs. Data protection that works at rest and in transit stops the moment a model reads it. The controls built for the last era weren't designed for software that decides for itself.</p>
+      </div>
+      <div class="problems">
+        <div class="problem"><h3>Shadow AI</h3><p>Employees paste sensitive data into unapproved AI tools, and nobody finds out until after the incident.</p></div>
+        <div class="problem"><h3>Ungoverned agents</h3><p>Agents ship without security review, with broad tool access and no registered owner.</p></div>
+        <div class="problem"><h3>Poisoned tooling</h3><p>Malicious MCP servers and tampered tool definitions can redirect an agent toward exfiltration.</p></div>
+        <div class="problem"><h3>No proof</h3><p>When the auditor asks what a model saw and what an agent did, most organizations have no record to show.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="products">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Products</div><h2>Three products. One security stack for AI.</h2></div>
+        <p>Each product secures a different layer of how AI runs in the enterprise. They work on their own, and they're built to work together.</p>
+      </div>
+
+      <div class="stack" aria-label="Where each product sits">
+        <div class="layer" style="--c:var(--tv)"><span class="lname">Fleet &amp; posture</span><span class="ldesc">Which agents exist, what they can reach, and how risky they are</span><span class="lprod">ThreatVec</span></div>
+        <div class="layer" style="--c:var(--bs)"><span class="lname">Inference</span><span class="ldesc">What each prompt contains, which model may see it, and proof of every decision</span><span class="lprod">Bastion</span></div>
+        <div class="layer" style="--c:var(--sn)"><span class="lname">Runtime &amp; kernel</span><span class="ldesc">What an agent is allowed to execute, at the application, network, and OS level</span><span class="lprod">Snapper</span></div>
+      </div>
+
+      <div class="products">
+        <article class="product" style="--c:var(--tv)">
+          <span class="tag">AI Agent SPM</span>
+          <h3>ThreatVec</h3>
+          <p class="one">Catch shadow AI before it becomes a breach.</p>
+          <p class="desc">Continuous visibility into every AI agent in the enterprise: what it can access, how it behaves, and where it drifts from policy.</p>
+          <ul>
+            <li>0–100 AI Posture Score across agents, MCP servers, and shadow AI</li>
+            <li>MCP server integrity scanning for hidden instructions and drift</li>
+            <li>Continuous red teaming mapped to MITRE ATLAS</li>
+            <li>Hash-chained audit trail and one-click compliance evidence</li>
+          </ul>
+          <div class="stat"><div><b>5 min</b><span>to first signal</span></div><div><b>554+</b><span>AI services detected</span></div></div>
+          <a class="go" href="https://threatvec.com/">Public beta, free 6-month trial · threatvec.com →</a>
+        </article>
+
+        <article class="product" style="--c:var(--bs)">
+          <span class="tag">AI governance plane</span>
+          <h3>Bastion</h3>
+          <p class="one">Enterprise AI, without the trade-off.</p>
+          <p class="desc">Governs AI at the moment of inference. It classifies every prompt, keeps regulated work inside your boundary, routes the rest to the cheapest capable model, and proves every decision.</p>
+          <ul>
+            <li>Fail-closed enforcement for regulated data, with PII/PHI de-identified</li>
+            <li>Cost-aware routing that favors in-boundary models</li>
+            <li>OpenAI-compatible drop-in, single container</li>
+            <li>Tamper-evident, hash-chained decision log</li>
+          </ul>
+          <div class="stat"><div><b>97.6%</b><span>de-identification recall</span></div><div><b>~27 ms</b><span>median overhead</span></div></div>
+          <a class="go" href="https://bastionplane.ai/">Pilots available · bastionplane.ai →</a>
+        </article>
+
+        <article class="product" style="--c:var(--sn)">
+          <span class="tag">Runtime enforcement</span>
+          <h3>Snapper</h3>
+          <p class="one">For agents that can escape their sandbox.</p>
+          <p class="desc">Security that follows an agent from application intent down to kernel enforcement, with a policy engine that learns from every decision.</p>
+          <ul>
+            <li>Fail-closed policy engine with approvals and a kill switch</li>
+            <li>Landlock/Seatbelt containment and eBPF monitoring</li>
+            <li>MCP supply-chain integrity and rug-pull detection</li>
+            <li>Self-hosted, including air-gapped deployments</li>
+          </ul>
+          <div class="stat"><div><b>&lt;10 ms</b><span>policy evaluation</span></div><div><b>27K+</b><span>MCP servers cataloged</span></div></div>
+          <a class="go" href="https://snapperprotect.com/">Free closed beta · snapperprotect.com →</a>
+        </article>
+      </div>
+      <p class="note">Bastion figures are measured in-house; independent penetration testing and SOC 2 are in progress.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">How we build</div><h2>Built by an operator who has had to answer to the board.</h2></div>
+        <p>These products come from decades of running technology where failure makes the news, and from sitting on the board side of the table when it does.</p>
+      </div>
+      <div class="principles">
+        <div class="principle"><span class="n">01</span><h3>Fail closed</h3><p>When a control can't decide, the default is to block, not to allow. Regulated data never leaves the boundary on a guess.</p></div>
+        <div class="principle"><span class="n">02</span><h3>Prove it</h3><p>Every decision goes into a hash-chained record. Evidence for an auditor should come from a button, not a fire drill.</p></div>
+        <div class="principle"><span class="n">03</span><h3>Your boundary</h3><p>Self-hosted by design. Your prompts, your data, and your keys stay on infrastructure you control.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="founder" class="band">
+    <div class="wrap">
+      <div class="founder">
+        <div>
+          <div class="eyebrow">Founder</div>
+          <h2 style="margin-top:16px">John McKinley</h2>
+          <p class="role">Founder, McKinley Labs · Board member and Technology Committee Chair, Equifax · Founder, Great Falls Ventures</p>
+          <div class="facts">
+            <div><b>4×</b><span>Fortune 500 CTO</span></div>
+            <div><b>18 yrs</b><span>Equifax board</span></div>
+            <div><b>Since 2007</b><span>investing in AI</span></div>
+            <div><b>13</b><span>portfolio exits</span></div>
+          </div>
+          <div class="links">
+            <a href="https://www.linkedin.com/in/johnamckinley/">LinkedIn</a>
+            <a href="https://github.com/jmckinley">GitHub</a>
+            <a href="https://medium.com/@johnamckinley">Medium</a>
+            <a href="https://greatfallsventures.com/">Great Falls Ventures</a>
+          </div>
+        </div>
+        <div class="bio">
+          <p>John has spent three decades running technology where the stakes are highest. Today he writes the code himself.</p>
+          <p>He was Chief Technology Officer at News Corp, AOL, Merrill Lynch, and GE Capital, leading engineering organizations of thousands. At Merrill Lynch, his team delivered the firm's first robo-advisor in 2002. He began his career at Ernst &amp; Young, where he became a partner and helped establish the firm's US computer security practice.</p>
+          <p>Since 2008 he has served on the Equifax board, where he chairs the Technology Committee and oversees AI security, AI in software engineering, and the company's cloud transformation. Through Great Falls Ventures he has backed AI companies since 2007, starting with Powerset (acquired by Microsoft and built into Bing).</p>
+          <p>He founded McKinley Labs in 2025 to build the security infrastructure he wanted as a board member and couldn't buy.</p>
+        </div>
+      </div>
+      <div class="career">
+        <div><b>News Corp</b><span>Chief Technology Officer</span></div>
+        <div><b>AOL</b><span>President &amp; CTO, AOL Technologies</span></div>
+        <div><b>Merrill Lynch</b><span>EVP, Head of Global Technology</span></div>
+        <div><b>GE Capital</b><span>Chief Information &amp; Technology Officer</span></div>
+        <div><b>Ernst &amp; Young</b><span>Partner</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="record">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Track record</div><h2>Thirteen exits as an investor and advisor.</h2></div>
+        <p>Through Great Falls Ventures, John has backed early-stage companies in AI, search, security, and communications, from seed stage to acquisition.</p>
+      </div>
+      <div class="exits">
+        <div class="exit"><span class="q">2008</span><span>Powerset <span class="arrow">→</span> Microsoft</span></div>
+        <div class="exit"><span class="q">2008</span><span>MessageLabs <span class="arrow">→</span> Symantec</span></div>
+        <div class="exit"><span class="q">2009</span><span>Xoopit <span class="arrow">→</span> Yahoo</span></div>
+        <div class="exit"><span class="q">2009</span><span>AppJet <span class="arrow">→</span> Google</span></div>
+        <div class="exit"><span class="q">2011</span><span>JamLegend <span class="arrow">→</span> Zynga</span></div>
+        <div class="exit"><span class="q">2011</span><span>OurParents <span class="arrow">→</span> RealPage</span></div>
+        <div class="exit"><span class="q">2014</span><span>PlayHaven <span class="arrow">→</span> Science, Inc.</span></div>
+        <div class="exit"><span class="q">2014</span><span>ObjectVideo (IP) <span class="arrow">→</span> Avigilon</span></div>
+        <div class="exit"><span class="q">2017</span><span>ObjectVideo (SI) <span class="arrow">→</span> Alarm.com</span></div>
+        <div class="exit"><span class="q">2018</span><span>Conversable <span class="arrow">→</span> LivePerson</span></div>
+        <div class="exit"><span class="q">2018</span><span>Computes <span class="arrow">→</span> Magic Leap</span></div>
+        <div class="exit"><span class="q">2023</span><span>Hypergiant <span class="arrow">→</span> Thrive Capital</span></div>
+        <div class="exit"><span class="q">2024</span><span>RepTrak <span class="arrow">→</span> Periscope Equity</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="writing">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Writing</div><h2>Notes from the work.</h2></div>
+        <p>Hands-on tests of what AI can actually do, and what it means for the companies building and buying it.</p>
+      </div>
+      <div class="posts">
+        <a class="post" href="https://medium.com/@johnamckinley/i-dont-want-ai-that-thinks-like-mckinsey-i-want-an-ai-that-does-what-mckinsey-never-could-62c4fd48545f">
+          <h3>I don't want AI that thinks like McKinsey. I want an AI that does what McKinsey never could.</h3>
+          <p>What happened when AI ran a full market-entry analysis, and what that means for strategy work.</p>
+          <span class="meta">Aug 2026 · 3 min read</span>
+        </a>
+        <a class="post" href="https://medium.com/@johnamckinley/from-1-000-drones-to-1-trillion-selloffs-mapping-the-real-ai-disruption-9ed51f44d3a8">
+          <h3>From $1,000 Drones to $1 Trillion Selloffs: Mapping the Real AI Disruption</h3>
+          <p>An investor's map of which businesses AI actually disrupts, and which ones the market is mispricing.</p>
+          <span class="meta">Feb 2026 · 10 min read</span>
+        </a>
+        <a class="post" href="https://medium.com/@johnamckinley/applying-an-ai-agent-openclaw-armed-with-the-scary-ability-to-pay-for-things-on-a-real-world-296a2c0da201">
+          <h3>An AI agent that can pay for things, on a real task: folly or breakthrough?</h3>
+          <p>A real-world test of handing an autonomous agent a credit card and an 8-day trip to plan.</p>
+          <span class="meta">Feb 2026 · 7 min read</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <div class="eyebrow">Contact</div>
+      <h2>Running agents in production? Let's talk.</h2>
+      <p>For pilots, beta access, partnerships, or investor conversations, reach out directly.</p>
+      <div class="ctas">
+        <a class="btn" href="mailto:john@greatfallsventures.com?subject=McKinley%20Labs">Email John →</a>
+        <a class="btn ghost" href="https://www.linkedin.com/in/johnamckinley/">Connect on LinkedIn</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 McKinley Labs, LLC · Great Falls, Virginia</span>
+    <span><a href="https://threatvec.com/">ThreatVec</a><a href="https://bastionplane.ai/">Bastion</a><a href="https://snapperprotect.com/">Snapper</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
